@@ -4,6 +4,8 @@ import { CallToAction } from "./call-to-action";
 import { Product } from "./product";
 import { Activity } from "./activity";
 import { SimpleWidget } from "./simple-widget";
+import { YouTube } from "./youtube";
+import { Testimonial } from "./testimonial";
 import { ImageContent } from "./image";
 import { GenericContent } from "./generic-content";
 
@@ -17,6 +19,7 @@ import { GenericContent } from "./generic-content";
  * `development` mode).
  *
  * Keys confirmed against the awesome-demo-dev (Travel starter) content model.
+ * `Testimonial` is a custom content type added for the extra-credit task.
  */
 const map = {
   Banner,
@@ -24,6 +27,8 @@ const map = {
   Product,
   Activity,
   SimpleWidget,
+  YouTube,
+  Testimonial,
   // Present in other starters / pages; harmless if the type doesn't exist:
   Image: ImageContent,
   webPageContent: GenericContent,

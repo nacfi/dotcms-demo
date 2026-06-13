@@ -3,7 +3,7 @@ import type {
   DotCMSPageRequestParams,
   DotCMSPageResponse,
 } from "@dotcms/types";
-import type { BannerContentlet, BlogContentlet, NavItem } from "./types";
+import type { BlogContentlet, NavItem } from "./types";
 
 const dotcmsUrl = process.env.NEXT_PUBLIC_DOTCMS_HOST ?? "";
 const authToken = process.env.NEXT_PUBLIC_DOTCMS_AUTH_TOKEN ?? "";
@@ -169,32 +169,5 @@ export async function getBlogByUrlTitle(
   } catch (error) {
     console.error(`[dotCMS] Failed to fetch blog "${urlTitle}":`, error);
     return null;
-  }
-}
-
-/**
- * Fetch Banner contentlets via the Content API to power the home hero carousel.
- * (The same Banner content type is also rendered in-place by UVE on any page
- * that has a banner container — see the components map.)
- */
-export async function getBanners(
-  options: { limit?: number; languageId?: string | number } = {},
-): Promise<BannerContentlet[]> {
-  if (!isDotCMSConfigured) return [];
-  const { limit = 5, languageId = DEFAULT_LANGUAGE_ID } = options;
-  try {
-    const res = await getClient()
-      .content.getCollection<BannerContentlet>("Banner")
-      .language(languageId)
-      .depth(1)
-      .limit(limit);
-
-    if ("contentlets" in res) {
-      return res.contentlets as BannerContentlet[];
-    }
-    return [];
-  } catch (error) {
-    console.error("[dotCMS] Failed to fetch banners:", error);
-    return [];
   }
 }

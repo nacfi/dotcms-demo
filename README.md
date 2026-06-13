@@ -18,7 +18,8 @@ A headless [dotCMS](https://www.dotcms.com/) web app built for the **Front-End S
 | Call to Action component | [`src/components/content-types/call-to-action.tsx`](src/components/content-types/call-to-action.tsx) |
 | Main navigation | [`src/components/layout/nav-bar.tsx`](src/components/layout/nav-bar.tsx) fed by the dotCMS navigation tree (GraphQL `DotNavigation`) |
 | **Extra credit:** Navigation API top nav | ✅ done — see above |
-| **Extra credit:** custom content type, Style editor | discussed in [Trade-offs & next steps](#trade-offs--next-steps) |
+| **Extra credit:** custom content type | ✅ `Testimonial` — [`testimonial.tsx`](src/components/content-types/testimonial.tsx) + [admin steps](#extra-credit-custom-content-type-testimonial) |
+| Also mapped | `YouTube` (embedded player), `Product`, `Activity`, `SimpleWidget` |
 
 ---
 
@@ -135,6 +136,24 @@ Components render defensively (multiple field aliases, graceful fallbacks), so a
 
 ---
 
+## Extra credit: custom content type (Testimonial)
+
+`Testimonial` is a **custom** content type with its component already wired ([`testimonial.tsx`](src/components/content-types/testimonial.tsx), registered in the components map). To create the type and use it (the API token can't write content types, so this part is done in the admin):
+
+1. **Content Model → Content Types → + New Content Type.** Name it `Testimonial` (variable name `Testimonial`).
+2. Add fields — the **Variable** names must match:
+   - **Text Area** → variable `quote` (required)
+   - **Text** → variable `authorName`
+   - **Text** → variable `authorTitle`
+   - *(optional)* **Image** → variable `image`
+3. **Save.**
+4. Create one: **Content → + New → Testimonial**, fill it in, **Publish**.
+5. Add it to a page in UVE: open a page in the editor and **+ Add Content → Testimonial** in a container (add `Testimonial` to that container's allowed types if prompted). It renders via the React component and is editable in place.
+
+That's the full author↔developer loop: define the type, map a component, authors manage it on pages.
+
+---
+
 ## Project structure
 
 ```
@@ -147,7 +166,7 @@ src/
 │  └─ not-found.tsx
 ├─ components/
 │  ├─ dotcms-page.tsx         # 'use client' UVE boundary (useEditableDotCMSPage)
-│  ├─ content-types/          # Banner, BannerCarousel, CallToAction, Product, Activity, SimpleWidget + MAP
+│  ├─ content-types/          # Banner(+Carousel), CallToAction, Product, Activity, SimpleWidget, YouTube, Testimonial + MAP
 │  ├─ layout/                 # Header (server) + NavBar (client) + Footer
 │  └─ ui/blog-card.tsx
 └─ lib/
@@ -161,8 +180,7 @@ src/
 
 ## Trade-offs & next steps
 
-- **Banner carousel vs. UVE.** `DotCMSLayoutBody` renders one component per contentlet, so a multi-slide carousel isn't expressible by mapping a single Banner. I render the Banner component in-place for UVE *and* aggregate Banners into a carousel on the home hero via the Content API. A fully UVE-native carousel would be the natural next step (a custom container renderer that groups sibling contentlets).
-- **Custom content type (extra credit).** Adding one is a matter of creating the type in dotCMS, adding a field-typed interface in `types.ts`, and registering a component in the map — the same pattern used here.
+- **Banner carousel (UVE-native).** `DotCMSLayoutBody` renders one component per contentlet, so a multi-slide carousel can't come from the components map alone. Instead [`dotcms-page.tsx`](src/components/dotcms-page.tsx) builds a `slots` map that groups the Banner contentlets in a container into one `<BannerCarousel>`: a container with 2+ banners becomes a carousel, driven by real page content and updating live as authors add/remove banners in UVE; a lone banner renders as a normal editable hero.
 - **Style editor (extra credit).** Not implemented; `dotStyleProperties` flows through on contentlets, so a component could read author-set style options to customize its rendering.
 - **Navigation source.** This environment's REST Navigation endpoint (`/api/v1/nav`, used by `client.nav.get()`) required auth the public dev token didn't grant, so the top nav is built from the GraphQL `DotNavigation` query — the same navigation tree, served anonymously for live menu items. `getNavigation` in `lib/dotcms.ts` is the single place to switch back to the REST client if your token has access.
 - **Read auth.** Published content (pages via GraphQL, content collections, navigation) reads anonymously, so the public site renders without elevated auth; the configured token is still sent on every request. UVE in-context editing is driven by the authenticated admin iframe (via `postMessage`), independent of the app's own token.

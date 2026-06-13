@@ -96,6 +96,26 @@ export interface SimpleWidgetContentlet extends DotCMSBasicContentlet {
   code?: string;
 }
 
+/** YouTube content type — `id` is the YouTube video id. */
+export interface YouTubeContentlet extends DotCMSBasicContentlet {
+  id?: string;
+  author?: string;
+  length?: string;
+  thumbnailLarge?: string;
+}
+
+/**
+ * Testimonial — a CUSTOM content type added for the extra-credit task.
+ * Create it in dotCMS (Content Model → Content Types) with these field
+ * variable names; this component renders it and it's editable in UVE.
+ */
+export interface TestimonialContentlet extends DotCMSBasicContentlet {
+  quote?: string;
+  authorName?: string;
+  authorTitle?: string;
+  image?: DotImageField;
+}
+
 /** Generic rich-text / widget content. */
 export interface GenericContentlet extends DotCMSBasicContentlet {
   body?: string;

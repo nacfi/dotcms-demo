@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation";
 import type { DotCMSPageRequestParams } from "@dotcms/types";
 import { DotCMSPage } from "@/components/dotcms-page";
-import { BannerCarousel } from "@/components/content-types/banner-carousel";
 import { SetupNotice } from "@/components/setup-notice";
-import { getBanners, getPage, isDotCMSConfigured } from "@/lib/dotcms";
+import { getPage, isDotCMSConfigured } from "@/lib/dotcms";
 
 // Authenticated, editor-aware content — always render at request time.
 export const dynamic = "force-dynamic";
@@ -44,22 +43,12 @@ export default async function CatchAllPage({
   }
   if (typeof variantName === "string") options.variantName = variantName;
 
-  // On the home route, also aggregate Banner content into a hero carousel
-  // (Content API). Other routes render purely from the dotCMS page layout.
-  const [pageResponse, banners] = await Promise.all([
-    getPage(path, options),
-    isHome ? getBanners({ limit: 5 }) : Promise.resolve([]),
-  ]);
+  const pageResponse = await getPage(path, options);
 
   if (!pageResponse?.pageAsset) {
     notFound();
   }
 
-  return (
-    <>
-      {isHome && banners.length > 0 && <BannerCarousel banners={banners} />}
-      <DotCMSPage pageResponse={pageResponse} />
-    </>
-  );
+  return <DotCMSPage pageResponse={pageResponse} />;
 }
 
