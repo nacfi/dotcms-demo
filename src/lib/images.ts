@@ -36,32 +36,30 @@ export function contentletImage<
 >(contentlet: T, field = "image"): string | null {
   const value = (contentlet as unknown as Record<string, unknown>)[field];
 
-  if (typeof value === "string" && value.length > 0) {
-    // Already an absolute URL or a server-relative path (e.g. Product's
-    // "/dA/<id>/image/file.jpg").
-    if (
-      value.startsWith("http://") ||
+  // A real asset path / absolute URL (e.g. Product's "/dA/<id>/image/x.jpg").
+  if (
+    typeof value === "string" &&
+    (value.startsWith("http://") ||
       value.startsWith("https://") ||
-      value.startsWith("/")
-    ) {
-      return dotAsset(value);
-    }
-    // A bare binary identifier/inode (e.g. Banner/Blog "image") → serve the
-    // field's binary via the shorty endpoint on the contentlet.
-    if (contentlet.identifier) {
-      return `${HOST}/dA/${contentlet.identifier}/${field}`;
-    }
-    return `${HOST}/dA/${value}`;
+      value.includes("/dA/"))
+  ) {
+    return dotAsset(value);
   }
 
+  // An object carrying a real asset path (DotFileasset / binary metadata).
+  // Only trust it if it resolves to an actual /dA/ asset — the Page API often
+  // returns a placeholder that collapses to the host root.
   if (value && typeof value === "object") {
     const resolved = dotAsset(value as DotImageField);
-    if (resolved) return resolved;
+    if (resolved && resolved.includes("/dA/")) return resolved;
   }
 
-  // No usable field value, but the contentlet carries a title image.
-  if (contentlet.identifier && contentlet.hasTitleImage) {
-    return `${HOST}/dA/${contentlet.identifier}`;
+  // Otherwise serve the field binary via the reliable shorty endpoint. This
+  // works regardless of how the API represented the field — a bare identifier
+  // (Content API) or a placeholder like "/" (Page API) — as long as the
+  // contentlet has a binary in `field` or a title image.
+  if (contentlet.identifier && (value || contentlet.hasTitleImage)) {
+    return `${HOST}/dA/${contentlet.identifier}/${field}`;
   }
   return null;
 }
