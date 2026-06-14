@@ -2,6 +2,8 @@
 
 A headless [dotCMS](https://www.dotcms.com/) web app built for the **Front-End Sales Engineer** technical challenge. It renders dotCMS pages with the official **dotCMS React SDK**, enables **UVE (Universal Visual Editing)** for in-context authoring, and adds a blog listing/detail experience plus a Banner carousel, Call to Action, and a top navigation built from the dotCMS Navigation API.
 
+> **Live demo:** **https://dotcms.vercel.app** — deployed on Vercel, with UVE pointing at the hosted (HTTPS) URL.
+>
 > **Status:** verified end-to-end against a live cloud.dotcms.dev Travel-starter environment — home page, navigation, banner carousel, blog listing, and blog detail all render real content. Built on `@dotcms/client` / `@dotcms/react` `1.5.6`. Content-type variable + field names are mapped to the Travel starter and isolated in two spots (see [Adapting to your content model](#adapting-to-your-content-model)).
 
 ---
@@ -19,6 +21,7 @@ A headless [dotCMS](https://www.dotcms.com/) web app built for the **Front-End S
 | Main navigation | [`src/components/layout/nav-bar.tsx`](src/components/layout/nav-bar.tsx) fed by the dotCMS navigation tree (GraphQL `DotNavigation`) |
 | **Extra credit:** Navigation API top nav | ✅ done — see above |
 | **Extra credit:** custom content type | ✅ `Testimonial` — [`testimonial.tsx`](src/components/content-types/testimonial.tsx) + [admin steps](#extra-credit-custom-content-type-testimonial) |
+| **Extra:** Velocity widgets, headless | `VtlInclude` → data-driven recommendation grids: [`vtl-include.tsx`](src/components/content-types/vtl-include.tsx) + [`/api/recommendations`](src/app/api/recommendations/route.ts) (see [trade-offs](#trade-offs--next-steps)) |
 | Also mapped | `YouTube` (embedded player), `Product`, `Activity`, `SimpleWidget` |
 
 ---
@@ -112,7 +115,26 @@ So dotCMS knows where your headless app lives:
      ]
    }
    ```
-4. Open **Pages** in the admin and edit a page — it now renders through this Next.js app inside the editor, with each contentlet editable in place. (When you deploy, add another entry with your hosted URL.)
+4. Open **Pages** in the admin and edit a page — it now renders through this Next.js app inside the editor, with each contentlet editable in place. (To edit against the deployed app instead, see [Deploy](#5-deploy-vercel).)
+
+### 5. Deploy (Vercel)
+
+The demo is deployed to **Vercel** at **https://dotcms.vercel.app**. The three `NEXT_PUBLIC_DOTCMS_*` values are set as Vercel project environment variables (Production) so `next build` inlines the public ones. To deploy your own:
+
+```bash
+npm i -g vercel
+vercel link
+vercel env add NEXT_PUBLIC_DOTCMS_HOST production    # repeat for AUTH_TOKEN + SITE_ID
+vercel --prod
+```
+
+Then point the UVE config (step 3) at the hosted URL:
+
+```json
+{ "config": [ { "pattern": ".*", "url": "https://dotcms.vercel.app" } ] }
+```
+
+Because both the dotCMS admin and the app are now served over **HTTPS**, the editor iframe loads without the mixed-content prompt that `http://localhost:3000` triggers. A single `.*` pattern matches every page and the first match wins, so swapping that one `url` toggles UVE between local dev and the hosted app.
 
 ---
 
@@ -161,12 +183,13 @@ src/
 ├─ app/
 │  ├─ layout.tsx              # shell: header (nav) + footer
 │  ├─ [[...slug]]/page.tsx    # all dotCMS pages via Page API + UVE; home adds the carousel
+│  ├─ api/recommendations/    # route handler backing the VtlInclude recommendation widgets
 │  ├─ blog/page.tsx           # blog listing (Content API)
 │  ├─ blog/[...slug]/page.tsx # blog detail (Block Editor) + CTA
 │  └─ not-found.tsx
 ├─ components/
 │  ├─ dotcms-page.tsx         # 'use client' UVE boundary (useEditableDotCMSPage)
-│  ├─ content-types/          # Banner(+Carousel), CallToAction, Product, Activity, SimpleWidget, YouTube, Testimonial + MAP
+│  ├─ content-types/          # Banner(+Carousel), CallToAction, Product, Activity, SimpleWidget, YouTube, Testimonial, VtlInclude + MAP
 │  ├─ layout/                 # Header (server) + NavBar (client) + Footer
 │  └─ ui/blog-card.tsx
 └─ lib/
@@ -181,6 +204,7 @@ src/
 ## Trade-offs & next steps
 
 - **Banner carousel (UVE-native).** `DotCMSLayoutBody` renders one component per contentlet, so a multi-slide carousel can't come from the components map alone. Instead [`dotcms-page.tsx`](src/components/dotcms-page.tsx) builds a `slots` map that groups the Banner contentlets in a container into one `<BannerCarousel>`: a container with 2+ banners becomes a carousel, driven by real page content and updating live as authors add/remove banners in UVE; a lone banner renders as a normal editable hero.
+- **VtlInclude widgets, reimplemented headlessly.** The home page's "Recommended Products" / "Recommended Events" are dotCMS *Velocity include* widgets — their `widgetCode` `#dotParse`s a server-side `.vtl` file, so there's no JSON payload and the GraphQL Page API can't hand back the executed HTML. Rather than leave them on the fallback renderer, [`vtl-include.tsx`](src/components/content-types/vtl-include.tsx) reimplements them as data-driven React: it classifies the widget by title and fetches the equivalent content (`Product` / `calendarEvent`) through a server-side [`/api/recommendations`](src/app/api/recommendations/route.ts) route handler — which keeps the token off the browser and avoids a cross-origin call — reusing the existing card components. Unrecognized widgets degrade to a labelled placeholder, mirroring the `SimpleWidget` treatment.
 - **Style editor (extra credit).** Not implemented; `dotStyleProperties` flows through on contentlets, so a component could read author-set style options to customize its rendering.
 - **Navigation source.** This environment's REST Navigation endpoint (`/api/v1/nav`, used by `client.nav.get()`) required auth the public dev token didn't grant, so the top nav is built from the GraphQL `DotNavigation` query — the same navigation tree, served anonymously for live menu items. `getNavigation` in `lib/dotcms.ts` is the single place to switch back to the REST client if your token has access.
 - **Read auth.** Published content (pages via GraphQL, content collections, navigation) reads anonymously, so the public site renders without elevated auth; the configured token is still sent on every request. UVE in-context editing is driven by the authenticated admin iframe (via `postMessage`), independent of the app's own token.

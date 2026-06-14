@@ -121,3 +121,27 @@ export interface GenericContentlet extends DotCMSBasicContentlet {
   body?: string;
   widgetTitle?: string;
 }
+
+/**
+ * Events (calendarEvent). Date-driven and, in this instance's model, has no
+ * image field — so it renders as a compact card rather than reusing the
+ * image-centric Activity/Product cards.
+ */
+export interface CalendarEventContentlet extends DotCMSBasicContentlet {
+  urlTitle?: string;
+  urlMap?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  tags?: string;
+}
+
+/**
+ * VtlInclude — a Velocity *include* widget. `widgetCode` is server-side
+ * Velocity that `#dotParse`s a `.vtl` file; there is no headless JSON payload
+ * for it (see the VtlInclude component for how we reimplement the known ones).
+ */
+export interface VtlIncludeContentlet extends DotCMSBasicContentlet {
+  widgetTitle?: string;
+  widgetCode?: string;
+}

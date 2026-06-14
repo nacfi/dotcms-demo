@@ -1,5 +1,6 @@
 import { createDotCMSClient } from "@dotcms/client";
 import type {
+  DotCMSBasicContentlet,
   DotCMSPageRequestParams,
   DotCMSPageResponse,
 } from "@dotcms/types";
@@ -143,6 +144,43 @@ export async function getBlogListing(
   } catch (error) {
     console.error("[dotCMS] Failed to fetch blog listing:", error);
     return { blogs: [], total: 0 };
+  }
+}
+
+/**
+ * Fetch the newest live contentlets of a content type, for the "recommended
+ * content" widgets reimplemented from VtlInclude. The original widgets render a
+ * Velocity `.vtl` file server-side, which has no headless representation — so we
+ * query the same content via the Content API and render it with React instead.
+ *
+ * Called from the `/api/recommendations` route handler (server-side) so the
+ * auth token never reaches the browser and there's no cross-origin fetch.
+ */
+export async function getRecommendations<
+  T extends DotCMSBasicContentlet = DotCMSBasicContentlet,
+>(
+  contentType: string,
+  limit = 3,
+  languageId: string | number = DEFAULT_LANGUAGE_ID,
+): Promise<T[]> {
+  if (!isDotCMSConfigured) return [];
+  try {
+    const res = await getClient()
+      .content.getCollection<T>(contentType)
+      .language(languageId)
+      // modDate is always indexed; avoids assuming a type-specific sort field.
+      .sortBy([{ field: "modDate", order: "desc" }])
+      .depth(1)
+      .limit(limit);
+
+    if ("contentlets" in res) return res.contentlets as T[];
+    return [];
+  } catch (error) {
+    console.error(
+      `[dotCMS] Failed to fetch recommendations for "${contentType}":`,
+      error,
+    );
+    return [];
   }
 }
 

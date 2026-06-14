@@ -35,6 +35,9 @@ yarn-error.log*
 # ...but keep the template committed so others can configure the project.
 !.env.example
 
+# Internal handoff notes — not part of the public deliverable
+CONTEXT.md
+
 # vercel
 .vercel
 
