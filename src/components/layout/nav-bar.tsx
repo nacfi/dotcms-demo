@@ -41,9 +41,7 @@ export function NavBar({ items }: { items: NavItem[] }) {
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-slate-900 text-sm font-black text-white">
             d
           </span>
-          <span>
-            dotCMS<span className="text-indigo-600"> × Next.js</span>
-          </span>
+          <span>dotCMS</span>
         </Link>
 
         <ul className="hidden items-center gap-1 md:flex">
