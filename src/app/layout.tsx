@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "dotCMS × Next.js",
-    template: "%s · dotCMS × Next.js",
+    default: "dotCMS",
+    template: "%s · dotCMS",
   },
   description:
     "A headless website built with the dotCMS React SDK, Next.js App Router, and Universal Visual Editing.",
