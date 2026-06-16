@@ -3,12 +3,9 @@ import type { TestimonialContentlet } from "@/lib/types";
 import { contentletImage } from "@/lib/images";
 
 /**
- * Testimonial — CUSTOM content type (extra credit).
- *
- * Demonstrates the full author↔developer loop: define the type in dotCMS,
- * map a React component here, and authors can add/manage it on any page via
- * UVE. Expects field variables: `quote`, `authorName`, `authorTitle`, and an
- * optional `image` avatar.
+ * Testimonial content type. Define the type in dotCMS, map this component, and
+ * authors can add/manage it on any page via UVE. Expects field variables:
+ * `quote`, `authorName`, `authorTitle`, and an optional `image` avatar.
  */
 export function Testimonial(props: Partial<TestimonialContentlet>) {
   const { quote, authorName, authorTitle } = props;

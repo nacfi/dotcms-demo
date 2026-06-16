@@ -15,11 +15,7 @@ import { GenericContent } from "./generic-content";
  *
  * <DotCMSLayoutBody> looks up `components[contentlet.contentType]` for every
  * contentlet in a container and renders `<Component {...contentlet} />`. Any
- * content type without an entry here falls back to the SDK's default renderer
- * (with a visible indicator in `development` mode).
- *
- * Keys confirmed against the awesome-demo-dev (Travel starter) content model.
- * `Testimonial` is a custom content type added for the extra-credit task.
+ * content type without an entry here falls back to the SDK's default renderer.
  * `VtlInclude` is a Velocity include widget reimplemented headlessly (see its
  * component) rather than left to the fallback renderer.
  */
@@ -32,7 +28,7 @@ const map = {
   YouTube,
   Testimonial,
   VtlInclude,
-  // Present in other starters / pages; harmless if the type doesn't exist:
+
   Image: ImageContent,
   webPageContent: GenericContent,
 };

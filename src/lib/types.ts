@@ -3,8 +3,8 @@ import type { DotCMSBasicContentlet, BlockEditorNode } from "@dotcms/types";
 /**
  * Field-level types for the content types we render.
  *
- * Field *variable names* below were confirmed against the live awesome-demo-dev
- * (Travel starter) instance by introspecting sample contentlets. They extend
+ * Field *variable names* below were confirmed against the live dotCMS instance
+ * (Travel starter) by introspecting sample contentlets. They extend
  * DotCMSBasicContentlet (which carries the system fields like identifier,
  * modDate, hasTitleImage) and mark content fields optional.
  */
@@ -105,9 +105,9 @@ export interface YouTubeContentlet extends DotCMSBasicContentlet {
 }
 
 /**
- * Testimonial — a CUSTOM content type added for the extra-credit task.
- * Create it in dotCMS (Content Model → Content Types) with these field
- * variable names; this component renders it and it's editable in UVE.
+ * Testimonial content type. Create it in dotCMS (Content Model → Content Types)
+ * with these field variable names; the mapped component renders it and it's
+ * editable in UVE.
  */
 export interface TestimonialContentlet extends DotCMSBasicContentlet {
   quote?: string;

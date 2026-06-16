@@ -12,7 +12,7 @@ export function Footer() {
           </a>{" "}
           + Next.js.
         </p>
-        <p>Front-End Sales Engineer technical challenge.</p>
+        <p>Universal Visual Editing enabled.</p>
       </div>
     </footer>
   );

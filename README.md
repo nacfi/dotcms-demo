@@ -1,16 +1,16 @@
-# dotCMS × Next.js — Headless Demo
+# dotCMS × Next.js — Headless Web App
 
-A headless [dotCMS](https://www.dotcms.com/) web app built for the **Front-End Sales Engineer** technical challenge. It renders dotCMS pages with the official **dotCMS React SDK**, enables **UVE (Universal Visual Editing)** for in-context authoring, and adds a blog listing/detail experience plus a Banner carousel, Call to Action, and a top navigation built from the dotCMS Navigation API.
+A headless [dotCMS](https://www.dotcms.com/) web app that renders dotCMS pages with the official **dotCMS React SDK**, enables **UVE (Universal Visual Editing)** for in-context authoring, and adds a blog listing/detail experience plus a Banner carousel, Call to Action, and a top navigation built from the dotCMS Navigation API.
 
-> **Live demo:** **https://dotcms.vercel.app** — deployed on Vercel, with UVE pointing at the hosted (HTTPS) URL.
+> **Live site:** **https://dotcms.vercel.app** — deployed on Vercel, with UVE pointing at the hosted (HTTPS) URL.
 >
 > **Status:** verified end-to-end against a live cloud.dotcms.dev Travel-starter environment — home page, navigation, banner carousel, blog listing, and blog detail all render real content. Built on `@dotcms/client` / `@dotcms/react` `1.5.6`. Content-type variable + field names are mapped to the Travel starter and isolated in two spots (see [Adapting to your content model](#adapting-to-your-content-model)).
 
 ---
 
-## What it demonstrates
+## Features
 
-| Challenge requirement | Where |
+| Feature | Where |
 | --- | --- |
 | Use the dotCMS client libraries | `@dotcms/client`, `@dotcms/react`, `@dotcms/types`, `@dotcms/uve` — see [`src/lib/dotcms.ts`](src/lib/dotcms.ts) |
 | Configure & enable UVE for page edits | [`src/components/dotcms-page.tsx`](src/components/dotcms-page.tsx) (`useEditableDotCMSPage` + `DotCMSLayoutBody`) + [UVE setup](#4-enable-uve-universal-visual-editing) |
@@ -19,9 +19,9 @@ A headless [dotCMS](https://www.dotcms.com/) web app built for the **Front-End S
 | Banner component (a carousel) | [`src/components/content-types/banner.tsx`](src/components/content-types/banner.tsx) + [`banner-carousel.tsx`](src/components/content-types/banner-carousel.tsx) |
 | Call to Action component | [`src/components/content-types/call-to-action.tsx`](src/components/content-types/call-to-action.tsx) |
 | Main navigation | [`src/components/layout/nav-bar.tsx`](src/components/layout/nav-bar.tsx) fed by the dotCMS navigation tree (GraphQL `DotNavigation`) |
-| **Extra credit:** Navigation API top nav | ✅ done — see above |
-| **Extra credit:** custom content type | ✅ `Testimonial` — [`testimonial.tsx`](src/components/content-types/testimonial.tsx) + [admin steps](#extra-credit-custom-content-type-testimonial) |
-| **Extra:** Velocity widgets, headless | `VtlInclude` → data-driven recommendation grids: [`vtl-include.tsx`](src/components/content-types/vtl-include.tsx) + [`/api/recommendations`](src/app/api/recommendations/route.ts) (see [trade-offs](#trade-offs--next-steps)) |
+| Navigation API top nav | ✅ — see above |
+| Custom content type | ✅ `Testimonial` — [`testimonial.tsx`](src/components/content-types/testimonial.tsx) + [admin steps](#custom-content-type-testimonial) |
+| Velocity widgets, headless | `VtlInclude` → data-driven recommendation grids: [`vtl-include.tsx`](src/components/content-types/vtl-include.tsx) + [`/api/recommendations`](src/app/api/recommendations/route.ts) (see [trade-offs](#trade-offs--next-steps)) |
 | Also mapped | `YouTube` (embedded player), `Product`, `Activity`, `SimpleWidget` |
 
 ---
@@ -50,7 +50,7 @@ Two complementary dotCMS data patterns are shown on purpose:
 
 - **Next.js 16 (App Router, React Server Components, Turbopack).** Server Components let page/content/nav fetching happen on the server with the read token, then hand a serializable page to a thin client boundary where UVE lives. This keeps the editable path isolated to exactly one `'use client'` component.
 - **dotCMS React SDK over raw `@dotcms/uve`.** dotCMS recommends the framework SDK; `useEditableDotCMSPage` + `DotCMSLayoutBody` handle the editor handshake, container/row layout, and dev-mode diagnostics so the work is components, not plumbing.
-- **React, not Angular.** dotCMS's admin is Angular and ships an official Angular SDK, so Angular is the more "native" route — but React/Next is my strongest stack and the best-supported headless path, which is the pragmatic SE call within the time budget. (Happy to talk through this on the call.)
+- **React, not Angular.** dotCMS's admin is Angular and ships an official Angular SDK, so Angular is the more "native" route — but React/Next is the best-supported headless path, and the one chosen here.
 - **Tailwind v4, zero UI/carousel libraries.** The carousel is hand-built on native CSS scroll-snap — fewer dependencies to justify and full control of the markup.
 
 ---
@@ -119,7 +119,7 @@ So dotCMS knows where your headless app lives:
 
 ### 5. Deploy (Vercel)
 
-The demo is deployed to **Vercel** at **https://dotcms.vercel.app**. The three `NEXT_PUBLIC_DOTCMS_*` values are set as Vercel project environment variables (Production) so `next build` inlines the public ones. To deploy your own:
+The app is deployed to **Vercel** at **https://dotcms.vercel.app**. The three `NEXT_PUBLIC_DOTCMS_*` values are set as Vercel project environment variables (Production) so `next build` inlines the public ones. To deploy your own:
 
 ```bash
 npm i -g vercel
@@ -158,7 +158,7 @@ Components render defensively (multiple field aliases, graceful fallbacks), so a
 
 ---
 
-## Extra credit: custom content type (Testimonial)
+## Custom content type (Testimonial)
 
 `Testimonial` is a **custom** content type with its component already wired ([`testimonial.tsx`](src/components/content-types/testimonial.tsx), registered in the components map). To create the type and use it (the API token can't write content types, so this part is done in the admin):
 
@@ -205,11 +205,11 @@ src/
 
 - **Banner carousel (UVE-native).** `DotCMSLayoutBody` renders one component per contentlet, so a multi-slide carousel can't come from the components map alone. Instead [`dotcms-page.tsx`](src/components/dotcms-page.tsx) builds a `slots` map that groups the Banner contentlets in a container into one `<BannerCarousel>`: a container with 2+ banners becomes a carousel, driven by real page content and updating live as authors add/remove banners in UVE; a lone banner renders as a normal editable hero.
 - **VtlInclude widgets, reimplemented headlessly.** The home page's "Recommended Products" / "Recommended Events" are dotCMS *Velocity include* widgets — their `widgetCode` `#dotParse`s a server-side `.vtl` file, so there's no JSON payload and the GraphQL Page API can't hand back the executed HTML. Rather than leave them on the fallback renderer, [`vtl-include.tsx`](src/components/content-types/vtl-include.tsx) reimplements them as data-driven React: it classifies the widget by title and fetches the equivalent content (`Product` / `calendarEvent`) through a server-side [`/api/recommendations`](src/app/api/recommendations/route.ts) route handler — which keeps the token off the browser and avoids a cross-origin call — reusing the existing card components. Unrecognized widgets degrade to a labelled placeholder, mirroring the `SimpleWidget` treatment.
-- **Style editor (extra credit).** Not implemented; `dotStyleProperties` flows through on contentlets, so a component could read author-set style options to customize its rendering.
+- **Style editor.** Not implemented; `dotStyleProperties` flows through on contentlets, so a component could read author-set style options to customize its rendering.
 - **Navigation source.** This environment's REST Navigation endpoint (`/api/v1/nav`, used by `client.nav.get()`) required auth the public dev token didn't grant, so the top nav is built from the GraphQL `DotNavigation` query — the same navigation tree, served anonymously for live menu items. `getNavigation` in `lib/dotcms.ts` is the single place to switch back to the REST client if your token has access.
 - **Read auth.** Published content (pages via GraphQL, content collections, navigation) reads anonymously, so the public site renders without elevated auth; the configured token is still sent on every request. UVE in-context editing is driven by the authenticated admin iframe (via `postMessage`), independent of the app's own token.
 - **Caching.** Everything is `force-dynamic` with `cache: 'no-cache'` for a faithful editing/preview experience; a production build would layer in `revalidateTag`/ISR for the public site.
 
 ## AI tooling
 
-Built with AI assistance (Claude). The SDK integration was written against the **installed package type definitions** (not just the public docs) to pin exact signatures for this version — e.g. confirming the client exposes `client.nav.get()` (docs say `client.navigation`) and that mapped components receive contentlet fields spread as props. Happy to walk through the process on the call.
+Built with AI assistance (Claude). The SDK integration was written against the **installed package type definitions** (not just the public docs) to pin exact signatures for this version — e.g. confirming the client exposes `client.nav.get()` (docs say `client.navigation`) and that mapped components receive contentlet fields spread as props.

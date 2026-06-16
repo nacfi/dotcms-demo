@@ -35,7 +35,7 @@ function getClient() {
       authToken,
       siteId,
       // Always fetch fresh: UVE edits + previews must reflect immediately, and
-      // we don't want authenticated content statically cached in this demo.
+      // we don't want authenticated content statically cached.
       requestOptions: { cache: "no-cache" },
     });
   }
