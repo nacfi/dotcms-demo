@@ -138,6 +138,16 @@ Because both the dotCMS admin and the app are now served over **HTTPS**, the edi
 
 ---
 
+## Mobile app (React Native)
+
+[`mobile/`](mobile/) contains an Expo (React Native) app that renders the **same published content** natively on iOS/Android — publish once in the visual editor and it's delivered to the website and the app alike. It consumes the same GraphQL page query and Content API the web app uses, with a native components map, page renderer, and Block Editor renderer. See [mobile/README.md](mobile/README.md) for the architecture; run it with:
+
+```bash
+cd mobile && npm install && npm run ios   # Xcode simulator via Expo Go
+```
+
+---
+
 ## Adapting to your content model
 
 Everything content-model-specific lives in two places:
